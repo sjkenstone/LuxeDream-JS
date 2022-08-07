@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSS  -->
+  <link rel="stylesheet" href="./styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+  <title>Luxe Dream - Products</title>
+</head>
+<body>
+  <nav class="navbar navbar-light bg-light">
+    <a id="brand-image" class="navbar-brand" href="#">
+      <b>Luxe Dream Event Hire</b> 
+    </a>
+  </nav>
+
+  <main>
+    
+    <section id="filter" class="w-100 d-flex px-5">
+      <!-- Category -->
+      <div id="category" class="mx-2 my-2">
+        <p>
+          <h5>Category</h5>
+        </p>
+        <select id="categoryId" class="form-select" onchange="filterFunction('cateFilter')">
+        </select>
+      </div>
+      <!-- Price -->
+      <div class="mx-2 my-2 flex-grow-1">
+        <p>
+          <h5>Price</h5>
+        </p>
+        <select id="price-filter" class="form-select" onchange="filterFunction('priceFilter')">
+          <option value="0">All</option>
+          <option value="100">Price between $0 and $100</option>
+          <option value="500">Price between $101 and $500</option>
+          <option value="1000">Price between $501 and $1000</option>
+          <option value="1001">Price more than $1000</option>
+        </select>
+      </div>
+      <!-- Sort -->
+      <div class="mx-2 my-2 flex-grow-1">
+        <p>
+          <h5>Sort</h5>
+        </p>
+        <div class="d-inline-block py-1 p-sm-0">
+          <button id="asc" type="button" class="btn btn-secondary" onclick="filterFunction('ascending')">Ascending</button>
+        </div>
+        <div class="d-inline-block py-1 p-sm-0">
+          <button id="dec" type="button" class="btn btn-secondary" onclick="filterFunction('decending')">Decending</button>
+        </div>
+        <div class="d-inline-block py-1 p-sm-0">
+          <button id="resetFilter" type="button" class="btn btn-warning" onclick="filterFunction('resetFilter')">Reset Filter</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Display Product by Grid -->
+    <section id="wrap" class="p-5">
+      <div class="row px-0">
+      </div>
+    </section>
+
+  </main>
+
+  <script type="text/javascript" src="./data.js"></script>
+  <script type="text/javascript" src="./index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+</body>
+</html>
