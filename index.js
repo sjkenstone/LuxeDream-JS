@@ -176,6 +176,7 @@ function priceFilter(urlPrice) {
   if(tempArr.length == 0) {//if no data in the range, display warning
     displayNothing();
   } else {
+    console.log(tempArr);
     displayData(tempArr);
     return tempArr;
   }
