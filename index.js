@@ -1,12 +1,15 @@
 let itemArray = [];
-let filterData = trimData(rawdata);
+let url_current_page_state;
+
+const filterData = trimData(rawdata);
 const cateId = document.getElementById('categoryId');
 const priceRange = document.getElementById('price-filter');
+const num_item_page = 22;
 
 initalStatus();
 
 function initalStatus() {
-  if (hasQueryParams()) {
+  if (hasQueryParams('categoryId') || hasQueryParams('priceRange')) {
     let cateId = getUrlParameter('categoryId');
     let price = getUrlParameter('priceRange');
     //display ddata with url including query params
@@ -16,8 +19,8 @@ function initalStatus() {
     itemArray = filterData;
 
     displayCategoryList();
-    displayData(filterData);
-    
+    // displayData(filterData);
+    setupPagination(filterData);
   }
 }
 
@@ -174,10 +177,12 @@ function priceFilter(urlPrice) {
   });
 
   if(tempArr.length == 0) {//if no data in the range, display warning
+    setupPagination([]);
     displayNothing();
   } else {
-    console.log(tempArr);
-    displayData(tempArr);
+    // displayData(tempArr);
+    setupPagination(tempArr);
+    deleteUrlParameter('page');
     return tempArr;
   }
 }
@@ -207,8 +212,8 @@ function ascFunc() {
   tempArr = priceFilter().sort(function (itemA, itemB) {
     return (itemA.price - itemB.price);
   });
-  console.log('Ascending - tempArr', tempArr);
-  displayData(tempArr);
+  // displayData(tempArr);
+  setupPagination(tempArr);
 }
 
 //data decending
@@ -217,8 +222,8 @@ function decFunc() {
   tempArr = priceFilter().sort(function (itemA, itemB) {
     return (itemB.price - itemA.price);
   });
-  console.log('Decending - tempArr', tempArr);
-  displayData(tempArr);
+  setupPagination(tempArr);
+  // displayData(tempArr);
 }
 
 //reset filter
@@ -229,7 +234,9 @@ function resetFilterFunc() {
   deleteUrlParameter('categoryId');
   deleteUrlParameter('priceRange');
   deleteUrlParameter('sort');
-  displayData(itemArray);
+  deleteUrlParameter('page');
+  setupPagination(itemArray);
+  // displayData(itemArray);
 }
 
 function displayNothing() {
@@ -260,7 +267,77 @@ function deleteUrlParameter(key) {
   window.history.pushState({ path: url.href }, '', url.href);
 }
 
-function hasQueryParams() {
+function hasQueryParams(key) {
   const url = window.location.search;
-  return url.includes('?');
+  return url.includes(`${key}`);
+}
+
+function displayPaginationList(dataset, current_page) {
+  let start = (current_page - 1) * num_item_page;
+  let end = start + num_item_page;
+  let pagi_data = dataset.slice(start, end);
+  displayData(pagi_data);
+}
+
+function setupPagination(dataset) {
+  const pagination_element = document.getElementById('pagination');
+  // let current_page = 1;
+  pagination_element.innerHTML = '';
+  const pages = Math.ceil(dataset.length / num_item_page);
+  
+
+  displayPaginationList(dataset, 1); //initial status
+
+  if (pages <= 1) { //if less 22 items on page, then hide pagination
+    pagination_element.style.display = 'none';
+  } else {
+    pagination_element.style.display = 'block';
+    for (let i = 1; i < pages + 1; i++) {
+      let btn = pagiBtn(i, dataset);
+      pagination_element.appendChild(btn);
+    }
+    
+    const btn_next = document.createElement('button');
+    btn_next.innerHTML = `Next`;
+    btn_next.className = 'btn btn-warning mx-1';
+    pagination_element.appendChild(btn_next);
+    
+    btn_next.addEventListener('click', function () {
+      if (hasQueryParams('page')) {
+        current_page = url_current_page_state;
+        current_page++;
+        if (current_page <= pages) {
+          console.log('current_page', current_page);
+          displayPaginationList(dataset, current_page);
+          setUrlParams('page', current_page);
+        }
+        url_current_page_state = current_page;
+      } else {
+        let current_page = 1;
+        current_page++;
+        displayPaginationList(dataset, current_page);
+        setUrlParams('page', current_page);
+        url_current_page_state = current_page;
+      }
+    });
+  }
+}
+
+function pagiBtn(page, dataset) {
+  let button = document.createElement('button');
+  button.className = 'btn btn-warning mx-1';
+  button.innerText = page;
+
+  button.addEventListener('click', function () {
+    let current_page = page;
+    if (current_page == 1) {
+      deleteUrlParameter('page');
+      displayPaginationList(dataset, current_page);
+    } else {
+      displayPaginationList(dataset, current_page);
+      setUrlParams('page', current_page);
+    }
+    url_current_page_state = page;
+  });
+  return button;
 }
