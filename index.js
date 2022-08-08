@@ -1,5 +1,6 @@
 let itemArray = [];
 let url_current_page_state;
+let current_page = 1;
 
 const filterData = trimData(rawdata);
 const cateId = document.getElementById('categoryId');
@@ -54,7 +55,7 @@ function filterFunction(item) {
 function trimData(dataSet) {
   let tempArr = [];
 
-  dataSet.forEach(function (item) {
+  dataSet.forEach(item => {
     if (item.productMedia.length != 0) {
       tempArr.push(item);
     }
@@ -272,8 +273,8 @@ function hasQueryParams(key) {
   return url.includes(`${key}`);
 }
 
-function displayPaginationList(dataset, current_page) {
-  let start = (current_page - 1) * num_item_page;
+function displayPaginationList(dataset, page) {
+  let start = (page - 1) * num_item_page;
   let end = start + num_item_page;
   let pagi_data = dataset.slice(start, end);
   displayData(pagi_data);
@@ -284,7 +285,7 @@ function setupPagination(dataset) {
   // let current_page = 1;
   pagination_element.innerHTML = '';
   const pages = Math.ceil(dataset.length / num_item_page);
-  
+  last_page = pages;
 
   displayPaginationList(dataset, 1); //initial status
 
@@ -297,27 +298,35 @@ function setupPagination(dataset) {
       pagination_element.appendChild(btn);
     }
     
-    const btn_next = document.createElement('button');
-    btn_next.innerHTML = `Next`;
-    btn_next.className = 'btn btn-warning mx-1';
+    let btn_next = setNextBtn();
     pagination_element.appendChild(btn_next);
     
     btn_next.addEventListener('click', function () {
       if (hasQueryParams('page')) {
-        current_page = url_current_page_state;
-        current_page++;
-        if (current_page <= pages) {
-          console.log('current_page', current_page);
-          displayPaginationList(dataset, current_page);
-          setUrlParams('page', current_page);
+        now_page = url_current_page_state;
+        now_page++;
+
+        if (now_page <= pages) {
+          displayPaginationList(dataset, now_page);
+          setUrlParams('page', now_page);
+
+          removeCurrentBtnActive();
+          setBtnActive(now_page);
         }
-        url_current_page_state = current_page;
+
+        // if(now_page == pages) {
+        //   btn_next.classList.add('disabled');
+        // }
+        url_current_page_state = now_page;
       } else {
-        let current_page = 1;
-        current_page++;
-        displayPaginationList(dataset, current_page);
-        setUrlParams('page', current_page);
-        url_current_page_state = current_page;
+        let now_page = 1;
+        now_page++;
+        displayPaginationList(dataset, now_page);
+        setUrlParams('page', now_page);
+
+        removeCurrentBtnActive();
+        setBtnActive(now_page);
+        url_current_page_state = now_page;
       }
     });
   }
@@ -325,19 +334,57 @@ function setupPagination(dataset) {
 
 function pagiBtn(page, dataset) {
   let button = document.createElement('button');
-  button.className = 'btn btn-warning mx-1';
+  button.className = 'btn btn-warning m-1';
+  button.setAttribute('id', `btn-${page}`);
   button.innerText = page;
 
+  if (current_page == page) {
+    button.classList.add('active');
+  }
+
   button.addEventListener('click', function () {
-    let current_page = page;
-    if (current_page == 1) {
+    current_page = page;
+    let nextBtn = document.querySelector('#next-button');
+
+    removeCurrentBtnActive();
+    button.classList.add('active');
+
+    if (current_page == 1) { 
       deleteUrlParameter('page');
       displayPaginationList(dataset, current_page);
+    } 
+    
+    if (current_page == last_page){
+      nextBtn.classList.add('disabled');
+      displayPaginationList(dataset, current_page);
+      setUrlParams('page', current_page);
     } else {
+      if (nextBtn.classList.contains('disabled')) {
+        nextBtn.classList.remove('disabled');
+      }
       displayPaginationList(dataset, current_page);
       setUrlParams('page', current_page);
     }
     url_current_page_state = page;
   });
   return button;
+}
+
+function setNextBtn() {
+  const btn_next = document.createElement('button');
+  btn_next.innerHTML = `Next`;
+  btn_next.className = 'btn btn-warning m-1';
+  btn_next.setAttribute('id', 'next-button');
+
+  return btn_next;
+}
+
+function removeCurrentBtnActive() {
+  let current_btn = document.querySelector('#pagination button.active');
+  current_btn.classList.remove('active');
+}
+
+function setBtnActive(page){
+  let btn = document.querySelector(`#btn-${page}`);
+  btn.classList.add('active');
 }

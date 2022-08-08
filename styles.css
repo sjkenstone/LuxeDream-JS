@@ -51,3 +51,12 @@
   height: 300px !important;
   overflow: hidden;
 }
+
+#pagination button {
+  background-color: white;
+  border-radius: 0;
+}
+
+#pagination button.active {
+  background-color: #ffca2c;
+}
