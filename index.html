@@ -61,14 +61,25 @@
 
     <!-- Display Product by Grid -->
     <section id="wrap" class="p-5">
-      <div class="row px-0">
+      <div id="paginated-content" class="row px-0">
       </div>
     </section>
 
-    <section id="pagination" class="pagenumbers p-5">
+    <!-- <section id="pagination" class="pagenumbers p-5">
 
-    </section>
+    </section> -->
 
+    <nav id="pagination" class="d-flex p-5">
+      <button id="prev-button" class="btn btn-primary m-1" onclick="directionButton('prev')">
+        Previous
+      </button>
+      <div id="pagination-numbers">
+
+      </div>
+      <button id="next-button" class="btn btn-primary m-1" onclick="directionButton('next')">
+        Next
+      </button>
+    </nav>
   </main>
 
   <script type="text/javascript" src="./data.js"></script>

@@ -1,26 +1,29 @@
 let itemArray = [];
 let url_current_page_state;
-let current_page = 1;
+// let current_page = 1;
 
 const filterData = trimData(rawdata);
 const cateId = document.getElementById('categoryId');
 const priceRange = document.getElementById('price-filter');
-const num_item_page = 22;
+
+const paginationNumbers = document.getElementById('pagination-numbers');
+const prevButton = document.getElementById('prev-button');
+const nextButton = document.getElementById('next-button');
+const pageNav = document.getElementById('pagination');
+const numItemOnPage = 22;
+let currentPage;
 
 initalStatus();
 
 function initalStatus() {
-  if (hasQueryParams('categoryId') || hasQueryParams('priceRange')) {
+  displayCategoryList();
+    
+  if (hasQueryParams('categoryId') || hasQueryParams('priceRange')) {//display ddata with url including query params
     let cateId = getUrlParameter('categoryId');
     let price = getUrlParameter('priceRange');
-    //display ddata with url including query params
-    displayCategoryList();
     categoryFilter(cateId, price);
   } else {
     itemArray = filterData;
-
-    displayCategoryList();
-    // displayData(filterData);
     setupPagination(filterData);
   }
 }
@@ -242,6 +245,8 @@ function resetFilterFunc() {
 
 function displayNothing() {
   document.getElementById('wrap').childNodes[1].innerHTML = `<p>No product in this range</p>`;
+  prevButton.classList.add('d-none');
+  nextButton.classList.add('d-none');
 }
 
 function setUrlParams(key, value) {
@@ -273,118 +278,115 @@ function hasQueryParams(key) {
   return url.includes(`${key}`);
 }
 
-function displayPaginationList(dataset, page) {
-  let start = (page - 1) * num_item_page;
-  let end = start + num_item_page;
-  let pagi_data = dataset.slice(start, end);
-  displayData(pagi_data);
+function setupPagination(dataset){
+  paginationNumbers.innerHTML = '';
+  prevButton.classList.remove('d-none');
+  nextButton.classList.remove('d-none');
+  pageNav.classList.remove('d-none');
+
+  displayData(dataset);
+  getPaginationNumbers(dataset);
+  setCurrentPage(1);
+  pagiButtonAction();
 }
 
-function setupPagination(dataset) {
-  const pagination_element = document.getElementById('pagination');
-  // let current_page = 1;
-  pagination_element.innerHTML = '';
-  const pages = Math.ceil(dataset.length / num_item_page);
-  last_page = pages;
+function appendPageNumber(index) {
+  const pageNumber = document.createElement('button');
+  pageNumber.className = 'pagination-number btn btn-primary m-1';
+  pageNumber.innerText = index;
+  pageNumber.setAttribute('page-index', index);
+  paginationNumbers.appendChild(pageNumber);
+}
 
-  displayPaginationList(dataset, 1); //initial status
+function getPaginationNumbers(dataset) {
+  pageCount = Math.ceil(dataset.length / numItemOnPage);
 
-  if (pages <= 1) { //if less 22 items on page, then hide pagination
-    pagination_element.style.display = 'none';
+  for (let i = 1; i <= pageCount; i++) {
+    appendPageNumber(i);
+  }
+}
+
+function setCurrentPage(pageNum) {
+  const paginatedContent = document.getElementById('paginated-content');
+  const listItems = paginatedContent.querySelectorAll('#content');
+
+  currentPage = pageNum;
+  
+  if (currentPage === 1) {
+    deleteUrlParameter('page');
   } else {
-    pagination_element.style.display = 'block';
-    for (let i = 1; i < pages + 1; i++) {
-      let btn = pagiBtn(i, dataset);
-      pagination_element.appendChild(btn);
-    }
-    
-    let btn_next = setNextBtn();
-    pagination_element.appendChild(btn_next);
-    
-    btn_next.addEventListener('click', function () {
-      if (hasQueryParams('page')) {
-        now_page = url_current_page_state;
-        now_page++;
-
-        if (now_page <= pages) {
-          displayPaginationList(dataset, now_page);
-          setUrlParams('page', now_page);
-
-          removeCurrentBtnActive();
-          setBtnActive(now_page);
-        }
-
-        // if(now_page == pages) {
-        //   btn_next.classList.add('disabled');
-        // }
-        url_current_page_state = now_page;
-      } else {
-        let now_page = 1;
-        now_page++;
-        displayPaginationList(dataset, now_page);
-        setUrlParams('page', now_page);
-
-        removeCurrentBtnActive();
-        setBtnActive(now_page);
-        url_current_page_state = now_page;
-      }
-    });
-  }
-}
-
-function pagiBtn(page, dataset) {
-  let button = document.createElement('button');
-  button.className = 'btn btn-warning m-1';
-  button.setAttribute('id', `btn-${page}`);
-  button.innerText = page;
-
-  if (current_page == page) {
-    button.classList.add('active');
+    setUrlParams('page', currentPage);
   }
 
-  button.addEventListener('click', function () {
-    current_page = page;
-    let nextBtn = document.querySelector('#next-button');
+  if(listItems.length <= numItemOnPage){
+    pageNav.classList.add('d-none');
+  } else {
+    pageNav.classList.remove('d-none');
+  }
 
-    removeCurrentBtnActive();
-    button.classList.add('active');
+  handleActivePageNumber();
+  handlePageButtonStatus();
 
-    if (current_page == 1) { 
-      deleteUrlParameter('page');
-      displayPaginationList(dataset, current_page);
-    } 
-    
-    if (current_page == last_page){
-      nextBtn.classList.add('disabled');
-      displayPaginationList(dataset, current_page);
-      setUrlParams('page', current_page);
-    } else {
-      if (nextBtn.classList.contains('disabled')) {
-        nextBtn.classList.remove('disabled');
-      }
-      displayPaginationList(dataset, current_page);
-      setUrlParams('page', current_page);
+  const preRange = (pageNum - 1) * numItemOnPage;
+  const currRange = pageNum * numItemOnPage;
+
+  listItems.forEach((item, index) => {
+    item.classList.add('d-none');
+    if(index >= preRange && index < currRange) {
+      item.classList.remove('d-none');
     }
-    url_current_page_state = page;
   });
-  return button;
 }
 
-function setNextBtn() {
-  const btn_next = document.createElement('button');
-  btn_next.innerHTML = `Next`;
-  btn_next.className = 'btn btn-warning m-1';
-  btn_next.setAttribute('id', 'next-button');
-
-  return btn_next;
+function pagiButtonAction() {
+  document.querySelectorAll('.pagination-number').forEach((button) => {
+    const pageIndex = Number(button.getAttribute('page-index'));
+    if (pageIndex) {
+      button.addEventListener('click', () => {
+        setCurrentPage(pageIndex);
+      });
+    }
+  });
 }
 
-function removeCurrentBtnActive() {
-  let current_btn = document.querySelector('#pagination button.active');
-  current_btn.classList.remove('active');
+function handleActivePageNumber() {
+  document.querySelectorAll('.pagination-number').forEach((button) => {
+    button.classList.remove('active');
+    const pageIndex = Number(button.getAttribute('page-index'));
+    
+    if (pageIndex === currentPage) {
+      button.classList.add('active');
+    }
+  });
 }
 
-function setBtnActive(page){
-  let btn = document.querySelector(`#btn-${page}`);
-  btn.classList.add('active');
+function disableButton(button) {
+  button.classList.add('disabled');
+  button.setAttribute('disabled',true);
 }
+
+function enableButton(button) {
+  button.classList.remove('disabled');
+  button.removeAttribute('disabled');
+}
+
+function handlePageButtonStatus() {
+  if(currentPage === 1) {
+    disableButton(prevButton);
+  } else {
+    enableButton(prevButton);
+  }
+
+  if(pageCount === currentPage) {
+    disableButton(nextButton);
+  } else {
+    enableButton(nextButton);
+  }
+}
+
+function directionButton(button) {
+  if (button === 'prev') setCurrentPage(currentPage - 1);
+
+  if (button === 'next') setCurrentPage(currentPage + 1);
+}
+
