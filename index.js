@@ -1,11 +1,7 @@
 let itemArray = [];
-let url_current_page_state;
-// let current_page = 1;
-
 const filterData = trimData(rawdata);
 const cateId = document.getElementById('categoryId');
 const priceRange = document.getElementById('price-filter');
-
 const paginationNumbers = document.getElementById('pagination-numbers');
 const prevButton = document.getElementById('prev-button');
 const nextButton = document.getElementById('next-button');
@@ -54,7 +50,6 @@ function filterFunction(item) {
   }
 }
 
-//trim rawdata
 function trimData(dataSet) {
   let tempArr = [];
 
@@ -88,8 +83,8 @@ function categorySet(dataSet) { //dataSet: filterData
       tempArr.push(item);
     }
   });
-  // remove duplicate item in tempArr;
-  let uniqueCategoryItem = tempArr.filter(function (item) {
+
+  let uniqueCategoryItem = tempArr.filter(function (item) {  // remove duplicate item in tempArr;
     let isDuplicate = uniqueItem.includes(item.categoryId);
 
     if (!isDuplicate) {
@@ -180,11 +175,10 @@ function priceFilter(urlPrice) {
     }
   });
 
-  if(tempArr.length == 0) {//if no data in the range, display warning
+  if(tempArr.length == 0) {
     setupPagination([]);
     displayNothing();
   } else {
-    // displayData(tempArr);
     setupPagination(tempArr);
     deleteUrlParameter('page');
     return tempArr;
@@ -192,7 +186,7 @@ function priceFilter(urlPrice) {
 }
 
 function priceFilterMethod(price, tempArr, item) {
-  if (price == 0 && item.productMedia.length != 0) { //remove the empty value in productMedia of object
+  if (price == 0 && item.productMedia.length != 0) {
     tempArr.push(item);
   }
   if (price == 100 && item.price <= 100) {
@@ -210,24 +204,20 @@ function priceFilterMethod(price, tempArr, item) {
   return tempArr;
 }
 
-//data ascending
 function ascFunc() {
   let tempArr = [];
   tempArr = priceFilter().sort(function (itemA, itemB) {
     return (itemA.price - itemB.price);
   });
-  // displayData(tempArr);
   setupPagination(tempArr);
 }
 
-//data decending
 function decFunc() {
   let tempArr = [];
   tempArr = priceFilter().sort(function (itemA, itemB) {
     return (itemB.price - itemA.price);
   });
   setupPagination(tempArr);
-  // displayData(tempArr);
 }
 
 //reset filter
@@ -240,7 +230,6 @@ function resetFilterFunc() {
   deleteUrlParameter('sort');
   deleteUrlParameter('page');
   setupPagination(itemArray);
-  // displayData(itemArray);
 }
 
 function displayNothing() {
